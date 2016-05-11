@@ -19,7 +19,7 @@ class ShoppingItem: NSObject, NSCoding
     init(name:String, imageName:String, unitPrice:String, quantity:Int, units:String, description:String)
     {
         self.name = name
-        self.imageName = imageName
+        self.imageName = imageName.stringByReplacingOccurrencesOfString(" ", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil).capitalizedString
         self.unitPrice = unitPrice
         self.quantity = quantity
         self.units = units
