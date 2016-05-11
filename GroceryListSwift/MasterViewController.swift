@@ -124,7 +124,6 @@ class MasterViewController: UITableViewController {
         shoppingItems.removeAtIndex(fromIndexPath.row)
         shoppingItems.insert(itemToMove, atIndex: toIndexPath.row)
         
-//        //hard core!!! out of time
         self.saveLists()
     }
     
@@ -153,7 +152,6 @@ class MasterViewController: UITableViewController {
         sender?.title = categorized ? "Uncategorize": "Categorize"
         
         tableView.reloadData()
-//        tableView.style = categorized ? UITableViewStyle.Grouped : UITableViewStyle.Plain
     }
 
     
@@ -175,36 +173,12 @@ class MasterViewController: UITableViewController {
         }
     }
  
-//    func calcShoppingList() -> [ShoppingItem] {
-//        return
-//    }
     func saveLists() -> Void {
         
         let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(shoppingItems as NSArray)
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setObject(archivedObject, forKey: "shoppingItems")
         defaults.synchronize()
-
-//        var shoppingItemsArchiveArray = [NSCoding]()
-//        for item in shoppingItems {
-//            let encodedObj = NSKeyedArchiver.archivedDataWithRootObject(item)
-//            shoppingItemsArchiveArray.append(encodedObj)
-//        }
-//        
-////        var shoppingItemsCategorizedArchive = [String:NSCoding]()
-////        for (key,list) in shoppingItemsCategorized {
-////            var shoppingItemsArchiveArray = [NSCoding]()
-////            for item in list {
-////                let encodedObj = NSKeyedArchiver.archivedDataWithRootObject(item)
-////                shoppingItemsArchiveArray.append(encodedObj)
-////            }
-////        }
-//        
-//        let defaults = NSUserDefaults.standardUserDefaults()
-//        defaults.setObject(shoppingItemsArchiveArray, forKey: "shoppingItems")
-////        defaults.setObject(self.shoppingItemsCategorized, forKey: "shoppingItemsCategorized")
-//        defaults.synchronize()
-
         
     }
     
