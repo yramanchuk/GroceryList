@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyJSON
 
 class SuggestedListManager: NSObject
 {
@@ -23,6 +24,7 @@ class SuggestedListManager: NSObject
         dispatch_once(&Static.onceToken)
         {
             Static.instance = SuggestedListManager()
+            Static.instance!.createShoppingListItemsFromJson()
             Static.instance!.createShoppingListItems()
         }
         return Static.instance!
@@ -53,4 +55,28 @@ class SuggestedListManager: NSObject
         self.suggestedItems.append(ShoppingItem(name: "Rice Krispies", imageName: "RiceKrispies", unitPrice: "$3.38", quantity: 1, units: "18 oz", description: "Kelloggs"))
     }
     
+    func createShoppingListItemsFromJson() {
+        guard let path = NSBundle.mainBundle().pathForResource("list", ofType: "json"),
+            let data = NSData(contentsOfFile: path)
+            else {
+                return
+        }
+        
+        let json = JSON(data: data)
+        
+        for (_,subJsonItems):(String, JSON) in json {
+            
+            let subJson = subJsonItems["item"]
+            if
+                let name = subJson["name"].string,
+                let imageName = subJson["imageName"].string,
+                let unitPrice = subJson["unitPrice"].string,
+                let units = subJson["units"].string {
+                
+                let quantity = subJson["quantity"].intValue
+                self.suggestedItems.append(ShoppingItem(name: name, imageName: imageName, unitPrice: unitPrice, quantity: quantity, units: units, description: description))
+            }
+            
+        }
+    }
 }
