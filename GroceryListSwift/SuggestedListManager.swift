@@ -10,6 +10,9 @@ import Foundation
 
 class SuggestedListManager: NSObject
 {
+    let kItemsSyncKey = "kItemsSyncKey"
+    let kItemsCategorizedSyncKey = "kItemsCategorizedSyncKey"
+    
     var suggestedItems = [ShoppingItem]()
     
     class var sharedInstance:SuggestedListManager
@@ -53,5 +56,37 @@ class SuggestedListManager: NSObject
         self.suggestedItems.append(ShoppingItem(name: "Rice Krispies", imageName: "RiceKrispies", unitPrice: "$3.38", quantity: 1, units: "18 oz", description: "Kelloggs"))
     }
     
+    
+    func saveShoppingItems(shoppingItems:[ShoppingItem]) -> Void {
+        
+        let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(shoppingItems as NSArray)
+        let defaults = NSUserDefaults.standardUserDefaults()
+        defaults.setObject(archivedObject, forKey: kItemsSyncKey)
+        defaults.synchronize()
+        
+    }
+    
+    func saveShoppingItemsCategorized(shoppingItems:[String:[ShoppingItem]]) -> Void {
+        
+        let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(shoppingItems as NSDictionary)
+        let defaults = NSUserDefaults.standardUserDefaults()
+        defaults.setObject(archivedObject, forKey: kItemsCategorizedSyncKey)
+        defaults.synchronize()
+        
+    }
+    
+    func retrieveShoppingItems() -> [ShoppingItem]? {
+        if let unarchivedObject = NSUserDefaults.standardUserDefaults().objectForKey(kItemsSyncKey) as? NSData {
+            return NSKeyedUnarchiver.unarchiveObjectWithData(unarchivedObject) as? [ShoppingItem]
+        }
+        return nil
+    }
+    
+    func retrieveShoppingItemsCategorized() -> [String:[ShoppingItem]]? {
+        if let unarchivedObject = NSUserDefaults.standardUserDefaults().objectForKey(kItemsCategorizedSyncKey) as? NSData {
+            return NSKeyedUnarchiver.unarchiveObjectWithData(unarchivedObject) as? [String:[ShoppingItem]]
+        }
+        return nil
+    }
     
 }

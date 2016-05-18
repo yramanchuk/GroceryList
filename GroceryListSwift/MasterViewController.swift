@@ -23,18 +23,23 @@ class MasterViewController: UITableViewController {
         super.viewDidLoad()
         
 
-        if let items = self.retrieveItems() {
+        if let items = SuggestedListManager.sharedInstance.retrieveShoppingItems() {
             shoppingItems = items
         } else {
             shoppingItems = SuggestedListManager.sharedInstance.suggestedItems;
         }
 
-        for item in shoppingItems {
-            if (shoppingItemsCategorized[item.itemDescription] == nil) {
-                shoppingItemsCategorized[item.itemDescription] = [ShoppingItem]()
+        if let items = SuggestedListManager.sharedInstance.retrieveShoppingItemsCategorized() {
+            shoppingItemsCategorized = items
+        } else {
+            for item in shoppingItems {
+                if (shoppingItemsCategorized[item.itemDescription] == nil) {
+                    shoppingItemsCategorized[item.itemDescription] = [ShoppingItem]()
+                }
+                shoppingItemsCategorized[item.itemDescription]?.append(item)
             }
-            shoppingItemsCategorized[item.itemDescription]?.append(item)
         }
+
         
         let editButton = UIBarButtonItem()
         editButton.target = self.editButtonItem().target
@@ -124,7 +129,8 @@ class MasterViewController: UITableViewController {
         shoppingItems.removeAtIndex(fromIndexPath.row)
         shoppingItems.insert(itemToMove, atIndex: toIndexPath.row)
         
-        self.saveLists()
+        SuggestedListManager.sharedInstance.saveShoppingItems(self.shoppingItems)
+        SuggestedListManager.sharedInstance.saveShoppingItemsCategorized(self.shoppingItemsCategorized)
     }
     
     func filterContentForSearchText(searchText: String, scope: String = "All") {
@@ -179,21 +185,6 @@ class MasterViewController: UITableViewController {
         }
     }
  
-    func saveLists() -> Void {
-        
-        let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(shoppingItems as NSArray)
-        let defaults = NSUserDefaults.standardUserDefaults()
-        defaults.setObject(archivedObject, forKey: "shoppingItems")
-        defaults.synchronize()
-        
-    }
-    
-    func retrieveItems() -> [ShoppingItem]? {
-        if let unarchivedObject = NSUserDefaults.standardUserDefaults().objectForKey("shoppingItems") as? NSData {
-            return NSKeyedUnarchiver.unarchiveObjectWithData(unarchivedObject) as? [ShoppingItem]
-        }
-        return nil
-    }
 }
 
 extension MasterViewController: UISearchBarDelegate {
