@@ -146,7 +146,6 @@ extension ShoppingItemDataSource {
             for (index, items) in shoppingItemsCategorized.items.enumerate() {
                 shoppingItemsCategorized.items[index] = items.sort() { $0.name < $1.name }
             }
-            shoppingItemsCategorized.categories.sortInPlace(<)
             saveShoppingItemsCategorized()
         }
     }
