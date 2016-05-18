@@ -10,10 +10,10 @@ import UIKit
 
 struct ShoppingItemsCategorized {
     var categories = [String]()
-    var items = [[ShoppingItem]]()
+    var itemObjects = [[ShoppingItem]]()
     
     func getShoppingListForCategory(categoryIdx: Int) -> [ShoppingItem]? {
-        return items[categoryIdx]
+        return itemObjects[categoryIdx]
     }
     
     func getShoppingListForCategory(categoryName: String) -> [ShoppingItem]? {
@@ -34,10 +34,10 @@ struct ShoppingItemsCategorized {
     
     mutating func moveShoppingItem(fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
         if (fromIndexPath.section != toIndexPath.section) {
-            let movedItem = items[fromIndexPath.section].removeAtIndex(fromIndexPath.row)
-            items[toIndexPath.section].insert(movedItem, atIndex: toIndexPath.row)
+            let movedItem = itemObjects[fromIndexPath.section].removeAtIndex(fromIndexPath.row)
+            itemObjects[toIndexPath.section].insert(movedItem, atIndex: toIndexPath.row)
         } else if (fromIndexPath.section != toIndexPath.section && fromIndexPath.row != toIndexPath.section) {
-            swap(&items[fromIndexPath.section][fromIndexPath.row], &items[toIndexPath.section][toIndexPath.row])
+            swap(&itemObjects[fromIndexPath.section][fromIndexPath.row], &itemObjects[toIndexPath.section][toIndexPath.row])
         }
         
     }
@@ -45,9 +45,9 @@ struct ShoppingItemsCategorized {
     mutating func appendItems(shoppingItems: [ShoppingItem]) {
         for item in shoppingItems {
             if let idx = categories.indexOf(item.itemDescription) {
-                items[idx].append(item)
+                itemObjects[idx].append(item)
             } else {
-                items.append([item])
+                itemObjects.append([item])
                 categories.append(item.itemDescription)
             }
         }
@@ -65,14 +65,14 @@ class ShoppingItemDataSource {
     private let kItemsCategorizedSyncKey = "kItemsCategorizedSyncKey"
     private let kItemsCategorizedKeysSyncKey = "kItemsCategorizedKeysSyncKey"
 
-    private var categorized = false
-    var filtered = false
+    private var isCategorized = false
+    var isFiltered = false
 
-    private var shoppingItems = [ShoppingItem]()
-    private var shoppingItemsCategorized = ShoppingItemsCategorized()
+    private var items = [ShoppingItem]()
+    private var itemsCategorized = ShoppingItemsCategorized()
 
-    private var filteredShoppingItems = [ShoppingItem]()
-    private var filteredShoppingItemsItemsCategorized = ShoppingItemsCategorized()
+    private var filteredItems = [ShoppingItem]()
+    private var filteredItemsCategorized = ShoppingItemsCategorized()
     
     init() {
         retrieveShoppingItems()
@@ -80,22 +80,22 @@ class ShoppingItemDataSource {
     }
     
     func moveShoppingItem(fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-        if (categorized) {
-            shoppingItemsCategorized.moveShoppingItem(fromIndexPath, toIndexPath: toIndexPath)
+        if (isCategorized) {
+            itemsCategorized.moveShoppingItem(fromIndexPath, toIndexPath: toIndexPath)
             saveShoppingItemsCategorized()
         } else if (fromIndexPath.row != toIndexPath.row) {
-            swap(&shoppingItems[fromIndexPath.row], &shoppingItems[toIndexPath.row])
+            swap(&items[fromIndexPath.row], &items[toIndexPath.row])
             saveShoppingItems()
         }
     }
     
     func categorizeShoppingList() {
-        categorized = !categorized
+        isCategorized = !isCategorized
     }
     
     
     func getCategorizeLbl() -> String {
-        return categorized ? kLblUncategorize: kLblCategorize
+        return isCategorized ? kLblUncategorize: kLblCategorize
     }
     
     
@@ -104,32 +104,32 @@ class ShoppingItemDataSource {
 //MARK: - table view helper
 extension ShoppingItemDataSource {
     func numberOfSections() -> Int {
-        return categorized ? shoppingItemsCategorized.categories.count : 1
+        return isCategorized ? itemsCategorized.categories.count : 1
     }
     
     func numberOfRowsInSection(section: Int) -> Int {
         
-        if filtered {
-            return categorized ? filteredShoppingItemsItemsCategorized.getShoppingListForCategory(section)!.count : filteredShoppingItems.count
+        if isFiltered {
+            return isCategorized ? filteredItemsCategorized.getShoppingListForCategory(section)!.count : filteredItems.count
         } else {
-            return categorized ? shoppingItemsCategorized.getShoppingListForCategory(section)!.count : shoppingItems.count
+            return isCategorized ? itemsCategorized.getShoppingListForCategory(section)!.count : items.count
         }
         
     }
     
     func titleForHeaderInSection(section: Int) -> String? {
-        if filtered {
-            return categorized ? filteredShoppingItemsItemsCategorized.categories[section] : nil
+        if isFiltered {
+            return isCategorized ? filteredItemsCategorized.categories[section] : nil
         } else {
-            return categorized ? shoppingItemsCategorized.categories[section] : nil
+            return isCategorized ? itemsCategorized.categories[section] : nil
         }
     }
     
     func shoppingItemForCell(indexPath: NSIndexPath) -> ShoppingItem {
-        if filtered {
-            return categorized ? (filteredShoppingItemsItemsCategorized.getShoppingItem(indexPath.section, itemIdx: indexPath.row))! : filteredShoppingItems[indexPath.row]
+        if isFiltered {
+            return isCategorized ? (filteredItemsCategorized.getShoppingItem(indexPath.section, itemIdx: indexPath.row))! : filteredItems[indexPath.row]
         } else {
-            return categorized ? (shoppingItemsCategorized.getShoppingItem(indexPath.section, itemIdx: indexPath.row))! : shoppingItems[indexPath.row]
+            return isCategorized ? (itemsCategorized.getShoppingItem(indexPath.section, itemIdx: indexPath.row))! : items[indexPath.row]
         }
         
     }
@@ -138,33 +138,33 @@ extension ShoppingItemDataSource {
 //MARK: - sorting & filtering
 extension ShoppingItemDataSource {
     func sortShoppingList() {
-        if (!categorized) {
-            shoppingItems.sortInPlace() { $0.name < $1.name }
+        if (!isCategorized) {
+            items.sortInPlace() { $0.name < $1.name }
             
             saveShoppingItems()
         } else {
-            for (index, items) in shoppingItemsCategorized.items.enumerate() {
-                shoppingItemsCategorized.items[index] = items.sort() { $0.name < $1.name }
+            for (index, items) in itemsCategorized.itemObjects.enumerate() {
+                itemsCategorized.itemObjects[index] = items.sort() { $0.name < $1.name }
             }
             saveShoppingItemsCategorized()
         }
     }
     
     func filterContentForSearchText(searchText: String, scope: String) {
-        if (!filtered) {
+        if (!isFiltered) {
             return
         }
         
-        if (!categorized) {
-            filteredShoppingItems = shoppingItems.filter({( shoppingItem : ShoppingItem) -> Bool in
+        if (!isCategorized) {
+            filteredItems = items.filter({( shoppingItem : ShoppingItem) -> Bool in
                 //            let categoryMatch = (scope == "All") || (shoppingItem.category == scope)
                 //            return categoryMatch && shoppingItem.name.lowercaseString.containsString(searchText.lowercaseString)
                 return shoppingItem.name.lowercaseString.containsString(searchText.lowercaseString)
             })
         } else {
-            for (index, items) in shoppingItemsCategorized.items.enumerate() {
+            for (index, items) in itemsCategorized.itemObjects.enumerate() {
 
-                filteredShoppingItemsItemsCategorized.items[index] = items.filter({( shoppingItem : ShoppingItem) -> Bool in
+                filteredItemsCategorized.itemObjects[index] = items.filter({( shoppingItem : ShoppingItem) -> Bool in
                     return shoppingItem.name.lowercaseString.containsString(searchText.lowercaseString)
                 })
             }
@@ -179,9 +179,9 @@ extension ShoppingItemDataSource {
     private func retrieveShoppingItems() {
         if let unarchivedObject = NSUserDefaults.standardUserDefaults().objectForKey(kItemsSyncKey) as? NSData,
             let unarchivedValue =  NSKeyedUnarchiver.unarchiveObjectWithData(unarchivedObject) as? [ShoppingItem] {
-            shoppingItems =  unarchivedValue
+            items =  unarchivedValue
         } else {
-            shoppingItems = SuggestedListManager.sharedInstance.suggestedItems
+            items = SuggestedListManager.sharedInstance.suggestedItems
         }
     }
     
@@ -193,15 +193,15 @@ extension ShoppingItemDataSource {
             let unarchivedObjectCategories = NSUserDefaults.standardUserDefaults().objectForKey(kItemsCategorizedKeysSyncKey) as? NSData,
             let unarchivedValueCategories =  NSKeyedUnarchiver.unarchiveObjectWithData(unarchivedObjectCategories) as? [String] {
             
-            shoppingItemsCategorized.items = unarchivedValue
-            shoppingItemsCategorized.categories = unarchivedValueCategories
+            itemsCategorized.itemObjects = unarchivedValue
+            itemsCategorized.categories = unarchivedValueCategories
             
-            filteredShoppingItemsItemsCategorized.items = unarchivedValue
-            filteredShoppingItemsItemsCategorized.categories = unarchivedValueCategories
+            filteredItemsCategorized.itemObjects = unarchivedValue
+            filteredItemsCategorized.categories = unarchivedValueCategories
             
         } else {
-            shoppingItemsCategorized.appendItems(shoppingItems)
-            filteredShoppingItemsItemsCategorized.appendItems(shoppingItems)
+            itemsCategorized.appendItems(items)
+            filteredItemsCategorized.appendItems(items)
             
         }
 
@@ -209,7 +209,7 @@ extension ShoppingItemDataSource {
     
     private func saveShoppingItems() {
         
-        let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(shoppingItems as NSArray)
+        let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(items as NSArray)
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setObject(archivedObject, forKey: kItemsSyncKey)
         defaults.synchronize()
@@ -218,8 +218,8 @@ extension ShoppingItemDataSource {
     
     private func saveShoppingItemsCategorized() {
         
-        let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(shoppingItemsCategorized.items as NSArray)
-        let archivedObjectKeys = NSKeyedArchiver.archivedDataWithRootObject(shoppingItemsCategorized.categories as NSArray)
+        let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(itemsCategorized.itemObjects as NSArray)
+        let archivedObjectKeys = NSKeyedArchiver.archivedDataWithRootObject(itemsCategorized.categories as NSArray)
         
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setObject(archivedObject, forKey: kItemsCategorizedSyncKey)

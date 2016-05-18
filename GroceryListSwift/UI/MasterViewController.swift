@@ -97,7 +97,7 @@ class MasterViewController: UITableViewController {
     
     //MARK: - filtering
     func filterContentForSearchText(searchText: String, scope: String /*= "All"*/) {
-        shoppingDataSource.filtered = searchController.active && searchController.searchBar.text != ""
+        shoppingDataSource.isFiltered = searchController.active && searchController.searchBar.text != ""
 
         shoppingDataSource.filterContentForSearchText(searchText, scope: scope)
         tableView.reloadData()
