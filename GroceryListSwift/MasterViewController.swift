@@ -48,7 +48,6 @@ class MasterViewController: UITableViewController {
         definesPresentationContext = true
         searchController.dimsBackgroundDuringPresentation = false
         
-//        searchController.searchBar.scopeButtonTitles = ["All", "Fruits", "Dry Fruits", "Other"]
         tableView.tableHeaderView = searchController.searchBar
         
         let sortButton = UIBarButtonItem()
@@ -67,7 +66,8 @@ class MasterViewController: UITableViewController {
     }
     
     override func viewWillAppear(animated: Bool) {
-        clearsSelectionOnViewWillAppear = splitViewController!.collapsed
+        //used for master-detail
+//        clearsSelectionOnViewWillAppear = splitViewController!.collapsed
         super.viewWillAppear(animated)
     }
     
@@ -165,10 +165,16 @@ class MasterViewController: UITableViewController {
                 } else {
                     shoppingItem = shoppingItems[indexPath.row]
                 }
-                let controller = (segue.destinationViewController as! UINavigationController).topViewController as! DetailViewController
+                
+                //used for master-detail
+//                let controller = (segue.destinationViewController as! UINavigationController).topViewController as! DetailViewController
+//                controller.detailShoppingItem = shoppingItem
+//                controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem()
+//                controller.navigationItem.leftItemsSupplementBackButton = true
+
+                let controller = segue.destinationViewController as! DetailViewController
                 controller.detailShoppingItem = shoppingItem
-                controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem()
-                controller.navigationItem.leftItemsSupplementBackButton = true
+                self.navigationController?.navigationBarHidden = false
             }
         }
     }
