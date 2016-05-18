@@ -143,8 +143,8 @@ extension ShoppingItemDataSource {
             
             saveShoppingItems()
         } else {
-            for var items in shoppingItemsCategorized.items {
-                items.sortInPlace() { $0.name < $1.name }
+            for (index, items) in shoppingItemsCategorized.items.enumerate() {
+                shoppingItemsCategorized.items[index] = items.sort() { $0.name < $1.name }
             }
             shoppingItemsCategorized.categories.sortInPlace(<)
             saveShoppingItemsCategorized()
