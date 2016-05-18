@@ -8,9 +8,13 @@
 
 import UIKit
 
-class DetailViewController: UIViewController {
+class DetailViewController: UITableViewController {
 
-    @IBOutlet weak var detailDescriptionLabel: UILabel!
+    @IBOutlet weak var image: UIImageView!
+    @IBOutlet weak var priceCell: UITableViewCell!
+    @IBOutlet weak var unitsCell: UITableViewCell!
+    @IBOutlet weak var quantatyCell: UITableViewCell!
+    @IBOutlet weak var descriptionCell: UITableViewCell!
 
 
     var detailShoppingItem: ShoppingItem? {
@@ -23,9 +27,23 @@ class DetailViewController: UIViewController {
     func configureView() {
         // Update the user interface for the detail item.
         if let detail = self.detailShoppingItem {
-            if let label = self.detailDescriptionLabel {
-                label.text = detail.itemDescription
+            if let priceCellView = self.priceCell {
+                priceCellView.textLabel?.text = detail.unitPrice
             }
+            if let unitsCellView = self.unitsCell {
+                unitsCellView.textLabel?.text = detail.units
+            }
+            if let quantatyCellView = self.quantatyCell {
+                quantatyCellView.textLabel?.text = String(format: "%d", detail.quantity)
+            }
+            if let descriptionCellView = self.descriptionCell {
+                descriptionCellView.textLabel?.text = detail.itemDescription
+            }
+            if let imageView = self.image {
+                imageView.image = UIImage(named: detail.imageName)
+            }
+
+            self.title = detail.name
         }
     }
 
