@@ -19,6 +19,7 @@
 		CB217D211CE3B3D200D6D94B /* SuggestedListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB217D201CE3B3D200D6D94B /* SuggestedListManager.swift */; };
 		CB217D231CE3B74900D6D94B /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CB217D221CE3B74900D6D94B /* Media.xcassets */; };
 		CB5801C11CEC7AAB00A71D50 /* Stack.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CB5801BF1CEC7AAB00A71D50 /* Stack.storyboard */; };
+		CB5801C51CECB79000A71D50 /* ShoppingItemDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5801C41CECB79000A71D50 /* ShoppingItemDataSource.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 		CB217D201CE3B3D200D6D94B /* SuggestedListManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SuggestedListManager.swift; sourceTree = "<group>"; };
 		CB217D221CE3B74900D6D94B /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		CB5801C01CEC7AAB00A71D50 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Stack.storyboard; sourceTree = "<group>"; };
+		CB5801C41CECB79000A71D50 /* ShoppingItemDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShoppingItemDataSource.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +111,7 @@
 			children = (
 				CB217CEE1CE3B38F00D6D94B /* AppDelegate.swift */,
 				CB217D1E1CE3B3B700D6D94B /* ShoppingItem.swift */,
+				CB5801C41CECB79000A71D50 /* ShoppingItemDataSource.swift */,
 				CB217D201CE3B3D200D6D94B /* SuggestedListManager.swift */,
 				CB217CF01CE3B38F00D6D94B /* MasterViewController.swift */,
 				CB217CF21CE3B38F00D6D94B /* DetailViewController.swift */,
@@ -274,6 +277,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB217D211CE3B3D200D6D94B /* SuggestedListManager.swift in Sources */,
+				CB5801C51CECB79000A71D50 /* ShoppingItemDataSource.swift in Sources */,
 				CB217D1F1CE3B3B700D6D94B /* ShoppingItem.swift in Sources */,
 				CB217CF31CE3B38F00D6D94B /* DetailViewController.swift in Sources */,
 				CB217CF11CE3B38F00D6D94B /* MasterViewController.swift in Sources */,

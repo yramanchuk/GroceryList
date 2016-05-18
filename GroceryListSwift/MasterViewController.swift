@@ -9,42 +9,16 @@
 import UIKit
 
 class MasterViewController: UITableViewController {
-    // MARK: - constants
-    let kLblUncategorize = "Uncategorize"
-    let kLblCategorize = "Categorize"
     
     // MARK: - Properties
-    var categorized = false
     var detailViewController: DetailViewController? = nil
-    var shoppingItems = [ShoppingItem]()
-    var shoppingItemsCategorized = [String : [ShoppingItem]]()
-    var filteredshoppingItems = [ShoppingItem]()
+    let shoppingDataSource = ShoppingItemDataSource()
     let searchController = UISearchController(searchResultsController: nil)
     
     // MARK: - View Setup
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-
-        if let items = SuggestedListManager.sharedInstance.retrieveShoppingItems() {
-            shoppingItems = items
-        } else {
-            shoppingItems = SuggestedListManager.sharedInstance.suggestedItems;
-        }
-
-        if let items = SuggestedListManager.sharedInstance.retrieveShoppingItemsCategorized() {
-            shoppingItemsCategorized = items
-        } else {
-            for item in shoppingItems {
-                if let _ = shoppingItemsCategorized[item.itemDescription] {
-                    shoppingItemsCategorized[item.itemDescription] = [ShoppingItem]()
-                }
                 
-                shoppingItemsCategorized[item.itemDescription]?.append(item)
-            }
-        }
-
-        
         let editButton = UIBarButtonItem()
         editButton.target = self.editButtonItem().target
         editButton.action = self.editButtonItem().action
@@ -62,7 +36,7 @@ class MasterViewController: UITableViewController {
         let sortButton = UIBarButtonItem()
         sortButton.target = self
         sortButton.action = #selector(MasterViewController.categorizeShoppingList(_:))
-        sortButton.title = getCategorizeLbl()
+        sortButton.title = shoppingDataSource.getCategorizeLbl()
         self.navigationItem.rightBarButtonItem = sortButton
 
         searchController.searchBar.showsBookmarkButton = true
@@ -86,34 +60,23 @@ class MasterViewController: UITableViewController {
     
     // MARK: - Table View
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return categorized ? shoppingItemsCategorized.count : 1
+        return shoppingDataSource.numberOfSections()
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if searchController.active && searchController.searchBar.text != "" {
-            return filteredshoppingItems.count
-        }
-        return categorized ? getShoppingListForCategory(section).count : shoppingItems.count
+        return shoppingDataSource.numberOfRowsInSection(section)
     }
     
     
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return categorized ? getShoppingListCategories()[section] : nil
+        return shoppingDataSource.titleForHeaderInSection(section)
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
-        let shoppingItem: ShoppingItem
-        if searchController.active && searchController.searchBar.text != "" {
-            shoppingItem = filteredshoppingItems[indexPath.row]
-        } else {
-            if categorized {
-                let sectionItems = getShoppingListForCategory(indexPath.section)
-                shoppingItem = sectionItems[indexPath.row]
-            } else {
-                shoppingItem = shoppingItems[indexPath.row]
-            }
-        }
+
+        let shoppingItem = shoppingDataSource.shoppingItemForCell(indexPath)
+
 
         cell.textLabel?.text = shoppingItem.name
         cell.detailTextLabel?.text = shoppingItem.unitPrice
@@ -130,39 +93,21 @@ class MasterViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-        moveShoppingItem(fromIndexPath, toIndexPath: toIndexPath)
+        shoppingDataSource.moveShoppingItem(fromIndexPath, toIndexPath: toIndexPath)
     }
     
+    //MARK: - filtering
     func filterContentForSearchText(searchText: String, scope: String /*= "All"*/) {
-        filteredshoppingItems = shoppingItems.filter({( shoppingItem : ShoppingItem) -> Bool in
-//            let categoryMatch = (scope == "All") || (shoppingItem.category == scope)
-//            return categoryMatch && shoppingItem.name.lowercaseString.containsString(searchText.lowercaseString)
-            return shoppingItem.name.lowercaseString.containsString(searchText.lowercaseString)
-        })
+        shoppingDataSource.filtered = searchController.active && searchController.searchBar.text != ""
+
+        shoppingDataSource.filterContentForSearchText(searchText, scope: scope)
         tableView.reloadData()
     }
     
     //MARK: - sorting
-    func sortShoppingList(sender: AnyObject?) {
-        if (!categorized) {
-            shoppingItems.sortInPlace() { $0.name < $1.name }
-            
-            SuggestedListManager.sharedInstance.saveShoppingItems(shoppingItems)
-        } else {
-            for (key,items) in shoppingItemsCategorized {
-                shoppingItemsCategorized[key] = items.sort() { $0.name < $1.name }
-            }
-            
-            SuggestedListManager.sharedInstance.saveShoppingItemsCategorized(shoppingItemsCategorized)
-        }
-        
-
-        tableView.reloadData();
-    }
-
     func categorizeShoppingList(sender: UIBarButtonItem?) {
-        categorized = !categorized
-        sender?.title = getCategorizeLbl()
+        shoppingDataSource.categorizeShoppingList()
+        sender?.title = shoppingDataSource.getCategorizeLbl()
         
         tableView.reloadData()
     }
@@ -172,12 +117,7 @@ class MasterViewController: UITableViewController {
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "showDetail" {
             if let indexPath = tableView.indexPathForSelectedRow {
-                let shoppingItem: ShoppingItem
-                if searchController.active && searchController.searchBar.text != "" {
-                    shoppingItem = filteredshoppingItems[indexPath.row]
-                } else {
-                    shoppingItem = shoppingItems[indexPath.row]
-                }
+                let shoppingItem = shoppingDataSource.shoppingItemForCell(indexPath)
                 
                 //used for master-detail
 //                let controller = (segue.destinationViewController as! UINavigationController).topViewController as! DetailViewController
@@ -195,62 +135,6 @@ class MasterViewController: UITableViewController {
  
 }
 
-// MARK: Categorization
-extension MasterViewController {
-
-    private func moveShoppingItem(fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-        if (categorized) {
-            if (fromIndexPath.section != toIndexPath.section) {
-                if var fromItems = shoppingItemsCategorized[getShoppingListCategories()[fromIndexPath.section]],
-                    var toItems = shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]] {
-                
-                    let movedItem = fromItems.removeAtIndex(fromIndexPath.row)
-                    toItems.insert(movedItem, atIndex: toIndexPath.row)
-                    
-                    shoppingItemsCategorized[getShoppingListCategories()[fromIndexPath.section]] = fromItems
-                    shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]] = toItems
-                    
-                }
-            } else {
-                if var items = shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]] {
-                    swap(&items[fromIndexPath.row], &items[toIndexPath.row])
-                }
-            }
-            
-            SuggestedListManager.sharedInstance.saveShoppingItemsCategorized(self.shoppingItemsCategorized)
-        } else {
-            let itemToMove = shoppingItems[fromIndexPath.row]
-            shoppingItems.removeAtIndex(fromIndexPath.row)
-            shoppingItems.insert(itemToMove, atIndex: toIndexPath.row)
-            
-            SuggestedListManager.sharedInstance.saveShoppingItems(self.shoppingItems)
-        }
-    }
-
-    private func getShoppingListForCategory(categoryIdx: Int ) -> [ShoppingItem] {
-        if let result = shoppingItemsCategorized[getShoppingListCategories()[categoryIdx]] {
-            return result
-        }
-        
-        return [ShoppingItem]()
-    }
-
-    private func getShoppingListForCategory(categoryName: String ) -> [ShoppingItem] {
-        if let result = shoppingItemsCategorized[categoryName] {
-            return result
-        }
-        
-        return [ShoppingItem]()
-    }
-
-    private func getShoppingListCategories() -> [String] {
-        return Array(shoppingItemsCategorized.keys)
-    }
-
-    private func getCategorizeLbl() -> String {
-        return categorized ? kLblUncategorize: kLblCategorize
-    }
-}
 
 extension MasterViewController: UISearchBarDelegate {
     func searchBar(searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
@@ -258,7 +142,8 @@ extension MasterViewController: UISearchBarDelegate {
     }
     
     func searchBarBookmarkButtonClicked(searchBar: UISearchBar) {
-        self.sortShoppingList(searchBar)
+        shoppingDataSource.sortShoppingList()
+        tableView.reloadData();
     }
 }
 
