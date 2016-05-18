@@ -230,3 +230,36 @@ extension ShoppingItemDataSource {
     }
 
 }
+
+
+//func saveShoppingItems(shoppingItems:[ShoppingItem]) -> Void {
+//    
+//    let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(shoppingItems as NSArray)
+//    let defaults = NSUserDefaults.standardUserDefaults()
+//    defaults.setObject(archivedObject, forKey: kItemsSyncKey)
+//    defaults.synchronize()
+//    
+//}
+//
+//func saveShoppingItemsCategorized(shoppingItems:[String:[ShoppingItem]]) -> Void {
+//    
+//    let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(shoppingItems as NSDictionary)
+//    let defaults = NSUserDefaults.standardUserDefaults()
+//    defaults.setObject(archivedObject, forKey: kItemsCategorizedSyncKey)
+//    defaults.synchronize()
+//    
+//}
+//
+//func retrieveShoppingItems() -> [ShoppingItem]? {
+//    if let unarchivedObject = NSUserDefaults.standardUserDefaults().objectForKey(kItemsSyncKey) as? NSData {
+//        return NSKeyedUnarchiver.unarchiveObjectWithData(unarchivedObject) as? [ShoppingItem]
+//    }
+//    return nil
+//}
+//
+//func retrieveShoppingItemsCategorized() -> [String:[ShoppingItem]]? {
+//    if let unarchivedObject = NSUserDefaults.standardUserDefaults().objectForKey(kItemsCategorizedSyncKey) as? NSData {
+//        return NSKeyedUnarchiver.unarchiveObjectWithData(unarchivedObject) as? [String:[ShoppingItem]]
+//    }
+//    return nil
+//}
