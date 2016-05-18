@@ -89,12 +89,12 @@ class MasterViewController: UITableViewController {
         if searchController.active && searchController.searchBar.text != "" {
             return filteredshoppingItems.count
         }
-        return categorized ? shoppingItemsCategorized[((shoppingItemsCategorized as NSDictionary).allKeys as! [String])[section]]!.count : shoppingItems.count
+        return categorized ? getShoppingListForCategory(section).count : shoppingItems.count
     }
     
     
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return categorized ? ((shoppingItemsCategorized as NSDictionary).allKeys as! [String])[section] : nil
+        return categorized ? getShoppingListCategories()[section] : nil
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -104,8 +104,8 @@ class MasterViewController: UITableViewController {
             shoppingItem = filteredshoppingItems[indexPath.row]
         } else {
             if categorized {
-                let sectionItems = shoppingItemsCategorized[((shoppingItemsCategorized as NSDictionary).allKeys as! [String])[indexPath.section]]
-                shoppingItem = sectionItems![indexPath.row]
+                let sectionItems = getShoppingListForCategory(indexPath.section)
+                shoppingItem = sectionItems[indexPath.row]
             } else {
                 shoppingItem = shoppingItems[indexPath.row]
             }
@@ -125,12 +125,7 @@ class MasterViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-        let itemToMove = shoppingItems[fromIndexPath.row]
-        shoppingItems.removeAtIndex(fromIndexPath.row)
-        shoppingItems.insert(itemToMove, atIndex: toIndexPath.row)
-        
-        SuggestedListManager.sharedInstance.saveShoppingItems(self.shoppingItems)
-        SuggestedListManager.sharedInstance.saveShoppingItemsCategorized(self.shoppingItemsCategorized)
+        moveShoppingItem(fromIndexPath, toIndexPath: toIndexPath)
     }
     
     func filterContentForSearchText(searchText: String, scope: String = "All") {
@@ -184,7 +179,44 @@ class MasterViewController: UITableViewController {
             }
         }
     }
+    
  
+}
+
+// MARK: Categorization
+extension MasterViewController {
+    private func moveShoppingItem(fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
+        if (categorized) {
+            if (fromIndexPath.section != toIndexPath.section) {
+                let movedItem = shoppingItemsCategorized[getShoppingListCategories()[fromIndexPath.section]]!.removeAtIndex(fromIndexPath.row)
+                shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]]!.insert(movedItem, atIndex: fromIndexPath.row)
+            } else {
+                var items = shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]]!
+                swap(&items[fromIndexPath.row], &items[toIndexPath.row])
+            }
+            
+            SuggestedListManager.sharedInstance.saveShoppingItemsCategorized(self.shoppingItemsCategorized)
+        } else {
+            let itemToMove = shoppingItems[fromIndexPath.row]
+            shoppingItems.removeAtIndex(fromIndexPath.row)
+            shoppingItems.insert(itemToMove, atIndex: toIndexPath.row)
+            
+            SuggestedListManager.sharedInstance.saveShoppingItems(self.shoppingItems)
+        }
+    }
+
+    private func getShoppingListForCategory(categoryIdx: Int ) -> [ShoppingItem] {
+        return shoppingItemsCategorized[getShoppingListCategories()[categoryIdx]]!
+    }
+
+    private func getShoppingListForCategory(categoryName: String ) -> [ShoppingItem] {
+        return shoppingItemsCategorized[categoryName]!
+    }
+
+    private func getShoppingListCategories() -> [String] {
+        return (shoppingItemsCategorized as NSDictionary).allKeys as! [String]
+    }
+
 }
 
 extension MasterViewController: UISearchBarDelegate {
