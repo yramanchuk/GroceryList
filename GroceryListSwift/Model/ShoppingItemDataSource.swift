@@ -177,6 +177,7 @@ extension ShoppingItemDataSource {
 //MARK: saving helpers
 extension ShoppingItemDataSource {
     private func retrieveShoppingItems() {
+        //re-write using async operations
         if let unarchivedObject = NSUserDefaults.standardUserDefaults().objectForKey(kItemsSyncKey) as? NSData,
             let unarchivedValue =  NSKeyedUnarchiver.unarchiveObjectWithData(unarchivedObject) as? [ShoppingItem] {
             items =  unarchivedValue
@@ -186,6 +187,7 @@ extension ShoppingItemDataSource {
     }
     
     private func retrieveShoppingItemsCategorized() {
+        //re-write using async operations
         if
             let unarchivedObject = NSUserDefaults.standardUserDefaults().objectForKey(kItemsCategorizedSyncKey) as? NSData,
             let unarchivedValue =  NSKeyedUnarchiver.unarchiveObjectWithData(unarchivedObject) as? [[ShoppingItem]],
@@ -208,24 +210,32 @@ extension ShoppingItemDataSource {
     }
     
     private func saveShoppingItems() {
+        let aQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_async(aQueue) { [weak self] in
+            if let strongSelf = self {
+                let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(strongSelf.items as NSArray)
+                let defaults = NSUserDefaults.standardUserDefaults()
+                defaults.setObject(archivedObject, forKey: strongSelf.kItemsSyncKey)
+                defaults.synchronize()
+            }
+        }
         
-        let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(items as NSArray)
-        let defaults = NSUserDefaults.standardUserDefaults()
-        defaults.setObject(archivedObject, forKey: kItemsSyncKey)
-        defaults.synchronize()
         
     }
     
     private func saveShoppingItemsCategorized() {
-        
-        let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(itemsCategorized.itemObjects as NSArray)
-        let archivedObjectKeys = NSKeyedArchiver.archivedDataWithRootObject(itemsCategorized.categories as NSArray)
-        
-        let defaults = NSUserDefaults.standardUserDefaults()
-        defaults.setObject(archivedObject, forKey: kItemsCategorizedSyncKey)
-        defaults.setObject(archivedObjectKeys, forKey: kItemsCategorizedKeysSyncKey)
-        defaults.synchronize()
-        
+        let aQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_async(aQueue) { [weak self] in
+            if let strongSelf = self {
+                let archivedObject = NSKeyedArchiver.archivedDataWithRootObject(strongSelf.itemsCategorized.itemObjects as NSArray)
+                let archivedObjectKeys = NSKeyedArchiver.archivedDataWithRootObject(strongSelf.itemsCategorized.categories as NSArray)
+                
+                let defaults = NSUserDefaults.standardUserDefaults()
+                defaults.setObject(archivedObject, forKey: strongSelf.kItemsCategorizedSyncKey)
+                defaults.setObject(archivedObjectKeys, forKey: strongSelf.kItemsCategorizedKeysSyncKey)
+                defaults.synchronize()
+            }
+        }
     }
 
 }
