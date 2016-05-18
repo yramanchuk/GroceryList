@@ -9,7 +9,10 @@
 import UIKit
 
 class MasterViewController: UITableViewController {
-
+    // MARK: - constants
+    let kLblUncategorize = "Uncategorize"
+    let kLblCategorize = "Categorize"
+    
     // MARK: - Properties
     var categorized = false
     var detailViewController: DetailViewController? = nil
@@ -33,9 +36,10 @@ class MasterViewController: UITableViewController {
             shoppingItemsCategorized = items
         } else {
             for item in shoppingItems {
-                if (shoppingItemsCategorized[item.itemDescription] == nil) {
+                if let _ = shoppingItemsCategorized[item.itemDescription] {
                     shoppingItemsCategorized[item.itemDescription] = [ShoppingItem]()
                 }
+                
                 shoppingItemsCategorized[item.itemDescription]?.append(item)
             }
         }
@@ -58,7 +62,7 @@ class MasterViewController: UITableViewController {
         let sortButton = UIBarButtonItem()
         sortButton.target = self
         sortButton.action = #selector(MasterViewController.categorizeShoppingList(_:))
-        sortButton.title = categorized ? "Uncategorize": "Categorize"
+        sortButton.title = getCategorizeLbl()
         self.navigationItem.rightBarButtonItem = sortButton
 
         searchController.searchBar.showsBookmarkButton = true
@@ -138,19 +142,26 @@ class MasterViewController: UITableViewController {
     }
     
     //MARK: - sorting
-    
     func sortShoppingList(sender: AnyObject?) {
-        shoppingItems.sortInPlace() { $0.name < $1.name }
+        if (!categorized) {
+            shoppingItems.sortInPlace() { $0.name < $1.name }
+            
+            SuggestedListManager.sharedInstance.saveShoppingItems(shoppingItems)
+        } else {
+            for (key,items) in shoppingItemsCategorized {
+                shoppingItemsCategorized[key] = items.sort() { $0.name < $1.name }
+            }
+            
+            SuggestedListManager.sharedInstance.saveShoppingItemsCategorized(shoppingItemsCategorized)
+        }
         
-        let defaults = NSUserDefaults.standardUserDefaults()
-        defaults.synchronize()
 
         tableView.reloadData();
     }
 
     func categorizeShoppingList(sender: UIBarButtonItem?) {
         categorized = !categorized
-        sender?.title = categorized ? "Uncategorize": "Categorize"
+        sender?.title = getCategorizeLbl()
         
         tableView.reloadData()
     }
@@ -185,10 +196,12 @@ class MasterViewController: UITableViewController {
 
 // MARK: Categorization
 extension MasterViewController {
+
     private func moveShoppingItem(fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
         if (categorized) {
             if (fromIndexPath.section != toIndexPath.section) {
                 let movedItem = shoppingItemsCategorized[getShoppingListCategories()[fromIndexPath.section]]!.removeAtIndex(fromIndexPath.row)
+                
                 shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]]!.insert(movedItem, atIndex: fromIndexPath.row)
             } else {
                 var items = shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]]!
@@ -214,9 +227,12 @@ extension MasterViewController {
     }
 
     private func getShoppingListCategories() -> [String] {
-        return (shoppingItemsCategorized as NSDictionary).allKeys as! [String]
+        return Array(shoppingItemsCategorized.keys)
     }
 
+    private func getCategorizeLbl() -> String {
+        return categorized ? kLblUncategorize: kLblCategorize
+    }
 }
 
 extension MasterViewController: UISearchBarDelegate {
