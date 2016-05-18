@@ -77,9 +77,8 @@ class MasterViewController: UITableViewController {
 
         let shoppingItem = shoppingDataSource.shoppingItemForCell(indexPath)
 
-
-        cell.textLabel?.text = shoppingItem.name
-        cell.detailTextLabel?.text = shoppingItem.unitPrice
+        (cell.viewWithTag(1) as! UILabel).text = shoppingItem.name
+        (cell.viewWithTag(2) as! UILabel).text = shoppingItem.unitPrice
         cell.imageView?.image = UIImage(named:shoppingItem.imageName);
         return cell
     }

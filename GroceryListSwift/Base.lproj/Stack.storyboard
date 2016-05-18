@@ -3,6 +3,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--Grocery List-->
@@ -13,31 +14,41 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
+                        <inset key="separatorInset" minX="15" minY="0.0" maxX="15" maxY="0.0"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" textLabel="ZR7-qK-j0D" detailTextLabel="bPS-8e-POX" style="IBUITableViewCellStyleValue1" id="AOd-Bx-fgB">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" id="AOd-Bx-fgB">
                                 <rect key="frame" x="0.0" y="113.5" width="600" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="AOd-Bx-fgB" id="i2B-SN-10j">
                                     <rect key="frame" x="0.0" y="0.0" width="567" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="ZR7-qK-j0D">
-                                            <rect key="frame" x="15" y="12" width="31.5" height="19.5"/>
-                                            <autoresizingMask key="autoresizingMask"/>
+                                        <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" tag="1" contentMode="left" text="Title" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pxg-5a-Pa2">
+                                            <rect key="frame" x="8" y="3" width="550" height="25"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                            <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Detail" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="bPS-8e-POX">
-                                            <rect key="frame" x="523.5" y="12" width="41.5" height="19.5"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                            <color key="textColor" red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="calibratedRGB"/>
+                                        <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" tag="2" contentMode="left" text="Subtitle" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TjV-hX-Uor">
+                                            <rect key="frame" x="8" y="25" width="550" height="15"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                     </subviews>
+                                    <constraints>
+                                        <constraint firstItem="TjV-hX-Uor" firstAttribute="top" secondItem="i2B-SN-10j" secondAttribute="topMargin" constant="17" id="3Nj-he-l8L"/>
+                                        <constraint firstItem="pxg-5a-Pa2" firstAttribute="leading" secondItem="TjV-hX-Uor" secondAttribute="leading" id="8dc-HB-RtO"/>
+                                        <constraint firstItem="pxg-5a-Pa2" firstAttribute="trailing" secondItem="TjV-hX-Uor" secondAttribute="trailing" id="IZf-g4-VBV"/>
+                                        <constraint firstItem="pxg-5a-Pa2" firstAttribute="top" secondItem="i2B-SN-10j" secondAttribute="topMargin" constant="-5" id="IZf-po-XSG"/>
+                                        <constraint firstItem="pxg-5a-Pa2" firstAttribute="leading" secondItem="i2B-SN-10j" secondAttribute="leadingMargin" id="RQL-hI-wWf"/>
+                                        <constraint firstItem="pxg-5a-Pa2" firstAttribute="centerX" secondItem="i2B-SN-10j" secondAttribute="centerX" id="lSd-Rf-m7X"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="TjV-hX-Uor" secondAttribute="bottom" constant="-4.5" id="p87-Ul-JPJ"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="pxg-5a-Pa2" secondAttribute="bottom" constant="7.5" id="rYZ-F4-dEx"/>
+                                    </constraints>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <edgeInsets key="layoutMargins" top="0.0" left="0.0" bottom="0.0" right="0.0"/>
                                 <connections>
                                     <segue destination="uDv-Ja-feR" kind="show" identifier="showDetail" id="R5m-Ad-2rf"/>
                                 </connections>
