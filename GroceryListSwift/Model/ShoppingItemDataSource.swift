@@ -36,7 +36,7 @@ struct ShoppingItemsCategorized {
         if (fromIndexPath.section != toIndexPath.section) {
             let movedItem = items[fromIndexPath.section].removeAtIndex(fromIndexPath.row)
             items[toIndexPath.section].insert(movedItem, atIndex: toIndexPath.row)
-        } else {
+        } else if (fromIndexPath.section != toIndexPath.section && fromIndexPath.row != toIndexPath.section) {
             swap(&items[fromIndexPath.section][fromIndexPath.row], &items[toIndexPath.section][toIndexPath.row])
         }
         
@@ -83,7 +83,7 @@ class ShoppingItemDataSource {
         if (categorized) {
             shoppingItemsCategorized.moveShoppingItem(fromIndexPath, toIndexPath: toIndexPath)
             saveShoppingItemsCategorized()
-        } else {
+        } else if (fromIndexPath.row != toIndexPath.row) {
             swap(&shoppingItems[fromIndexPath.row], &shoppingItems[toIndexPath.row])
             saveShoppingItems()
         }
