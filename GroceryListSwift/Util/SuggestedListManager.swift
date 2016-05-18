@@ -71,10 +71,11 @@ class SuggestedListManager: NSObject
                 let name = subJson["name"].string,
                 let imageName = subJson["imageName"].string,
                 let unitPrice = subJson["unitPrice"].string,
+                let itemDescription = subJson["itemDescription"].string,
                 let units = subJson["units"].string {
                 
                 let quantity = subJson["quantity"].intValue
-                self.suggestedItems.append(ShoppingItem(name: name, imageName: imageName, unitPrice: unitPrice, quantity: quantity, units: units, description: description))
+                self.suggestedItems.append(ShoppingItem(name: name, imageName: imageName, unitPrice: unitPrice, quantity: quantity, units: units, description: itemDescription))
             }
             
         }

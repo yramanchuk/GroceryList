@@ -5,6 +5,7 @@
       "imageName": "Orange",
       "unitPrice": "$500.49",
       "units": "18 oz",
+      "itemDescription": "Organic",
       "quantity": 24
     }
   },
@@ -14,6 +15,7 @@
       "imageName": "Orange",
       "unitPrice": "$500.49",
       "units": "18 oz",
+      "itemDescription": "Organic",
       "quantity": 24
     }
   }
