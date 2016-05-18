@@ -68,10 +68,10 @@ class MasterViewController: UITableViewController {
         searchController.searchBar.showsBookmarkButton = true
         searchController.searchBar.setImage(UIImage(named: "sort"), forSearchBarIcon: UISearchBarIcon.Bookmark, state: UIControlState.Normal)
         
-        if let splitViewController = splitViewController {
-            let controllers = splitViewController.viewControllers
-            detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
-        }
+//        if let splitViewController = splitViewController {
+//            let controllers = splitViewController.viewControllers
+//            detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
+//        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -114,8 +114,9 @@ class MasterViewController: UITableViewController {
                 shoppingItem = shoppingItems[indexPath.row]
             }
         }
-        cell.textLabel!.text = shoppingItem.name
-        cell.detailTextLabel!.text = shoppingItem.unitPrice
+
+        cell.textLabel?.text = shoppingItem.name
+        cell.detailTextLabel?.text = shoppingItem.unitPrice
         cell.imageView?.image = UIImage(named:shoppingItem.imageName);
         return cell
     }
@@ -132,7 +133,7 @@ class MasterViewController: UITableViewController {
         moveShoppingItem(fromIndexPath, toIndexPath: toIndexPath)
     }
     
-    func filterContentForSearchText(searchText: String, scope: String = "All") {
+    func filterContentForSearchText(searchText: String, scope: String /*= "All"*/) {
         filteredshoppingItems = shoppingItems.filter({( shoppingItem : ShoppingItem) -> Bool in
 //            let categoryMatch = (scope == "All") || (shoppingItem.category == scope)
 //            return categoryMatch && shoppingItem.name.lowercaseString.containsString(searchText.lowercaseString)
@@ -200,12 +201,20 @@ extension MasterViewController {
     private func moveShoppingItem(fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
         if (categorized) {
             if (fromIndexPath.section != toIndexPath.section) {
-                let movedItem = shoppingItemsCategorized[getShoppingListCategories()[fromIndexPath.section]]!.removeAtIndex(fromIndexPath.row)
+                if var fromItems = shoppingItemsCategorized[getShoppingListCategories()[fromIndexPath.section]],
+                    var toItems = shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]] {
                 
-                shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]]!.insert(movedItem, atIndex: fromIndexPath.row)
+                    let movedItem = fromItems.removeAtIndex(fromIndexPath.row)
+                    toItems.insert(movedItem, atIndex: toIndexPath.row)
+                    
+                    shoppingItemsCategorized[getShoppingListCategories()[fromIndexPath.section]] = fromItems
+                    shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]] = toItems
+                    
+                }
             } else {
-                var items = shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]]!
-                swap(&items[fromIndexPath.row], &items[toIndexPath.row])
+                if var items = shoppingItemsCategorized[getShoppingListCategories()[toIndexPath.section]] {
+                    swap(&items[fromIndexPath.row], &items[toIndexPath.row])
+                }
             }
             
             SuggestedListManager.sharedInstance.saveShoppingItemsCategorized(self.shoppingItemsCategorized)
@@ -219,11 +228,19 @@ extension MasterViewController {
     }
 
     private func getShoppingListForCategory(categoryIdx: Int ) -> [ShoppingItem] {
-        return shoppingItemsCategorized[getShoppingListCategories()[categoryIdx]]!
+        if let result = shoppingItemsCategorized[getShoppingListCategories()[categoryIdx]] {
+            return result
+        }
+        
+        return [ShoppingItem]()
     }
 
     private func getShoppingListForCategory(categoryName: String ) -> [ShoppingItem] {
-        return shoppingItemsCategorized[categoryName]!
+        if let result = shoppingItemsCategorized[categoryName] {
+            return result
+        }
+        
+        return [ShoppingItem]()
     }
 
     private func getShoppingListCategories() -> [String] {
